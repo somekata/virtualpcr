@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Virtual PCR Simulator</title>
+    <style>
+      /* Background and general styling */
+      body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #3498db, #8e44ad);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+      }
+
+      h1 {
+        margin-bottom: 20px;
+      }
+
+      /* Section styling */
+      .section {
+        display: none;
+        text-align: center;
+        padding: 20px;
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 80%;
+        max-width: 500px;
+      }
+
+      p {
+        text-align: left;
+      }
+
+      .active {
+        display: block;
+      }
+
+      /* Navigation button styling */
+      #navigation {
+        margin-top: 20px;
+      }
+
+      button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        background-color: #2ecc71;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        margin: 0 10px;
+      }
+
+      button:hover {
+        background-color: #27ae60;
+      }
+
+      button:disabled {
+        background-color: #95a5a6;
+        cursor: not-allowed;
+      }
+
+      /* Progress bar styling */
+      #progressContainer {
+        width: 80%;
+        max-width: 500px;
+        margin: 20px 0;
+        background-color: rgba(255, 255, 255, 0.3);
+        border-radius: 5px;
+        overflow: hidden;
+      }
+
+      #progressBar {
+        height: 10px;
+        background-color: #e74c3c;
+        width: 0;
+        transition: width 0.5s ease;
+      }
+      .version-history dl {
+        margin: 0;
+        padding: 0;
+      }
+
+      .version-history dt {
+        font-weight: bold;
+        margin-top: 10px;
+        font-size: 1.1em;
+      }
+
+      .version-history dt span {
+        font-weight: normal;
+        font-size: 0.9em;
+        color: #ddd;
+        margin-left: 10px;
+      }
+
+      .version-history dd {
+        margin-left: 20px;
+        margin-bottom: 10px;
+      }
+
+      /* Mobile scrolling */
+      body {
+        overflow-y: auto;
+        padding: 10px;
+      }
+
+      /* Scrollable sections on small screens */
+      .section {
+        max-height: 70vh; /* 70% of screen height */
+        overflow-y: auto; /* Enable vertical scrolling */
+      }
+
+      /* Start button */
+      #startBtn {
+        padding: 10px 30px;
+        font-size: 18px;
+        background-color: #f39c12;
+        border: none;
+        border-radius: 5px;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      #startBtn:hover {
+        background-color: #e67e22;
+      }
+
+      footer {
+        margin-top: 30px;
+        text-align: center;
+        color: white;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Welcome</h1>
+
+    <!-- Start button -->
+    <button id="startBtn" onclick="startGame()">Start</button>
+
+    <!-- Progress bar -->
+    <div id="progressContainer">
+      <div id="progressBar"></div>
+    </div>
+
+    <!-- Section 1 -->
+    <div id="section1" class="section active">
+      <h2>Overview</h2>
+      <p>
+        The Virtual PCR Simulator is an educational tool that simulates the PCR
+        (Polymerase Chain Reaction) experimental process. Players will
+        experience the complete workflow, from selecting enzymes to adding DNA
+        templates and primers, setting PCR cycles, running electrophoresis, gel
+        extraction, and sequencing. This simulator allows users to learn the
+        principles and practical aspects of PCR.
+      </p>
+    </div>
+
+    <!-- Section 2 -->
+    <div id="section2" class="section">
+      <h2>How to Use</h2>
+      <p>
+        1. Create Master Mix: Add selected enzymes and dNTP to create the Master
+        Mix.<br />
+        2. Add Template and Primers: Input DNA templates and set primers. You
+        can also check for primer suggestions and ranges.<br />
+        3. Set PCR Machine: Configure denaturation, annealing, extension
+        temperatures, and cycle count.<br />
+        4. Run Electrophoresis: Perform electrophoresis to check the PCR
+        products.<br />
+        5. Gel Extraction and Sequencing: Extract PCR products from the gel and
+        run sequencing. Results can also be downloaded.
+      </p>
+    </div>
+
+    <!-- Section 3 -->
+    <div id="section3" class="section">
+      <h2>Version Information</h2>
+      <div class="version-history">
+        <dl>
+          <dt>2024-9-18 <span>Version 1.000</span></dt>
+          <dd>Initial release</dd>
+          <dt>2024-10-9 <span>Version 1.002</span></dt>
+          <dd>
+            Modified for GitHub Pages. Programming assistance provided by
+            ChatGPT for improvements and modifications.
+          </dd>
+        </dl>
+      </div>
+    </div>
+
+    <!-- Navigation buttons -->
+    <div id="navigation">
+      <button id="prevBtn" onclick="showPrevSection()">Previous</button>
+      <button id="nextBtn" onclick="showNextSection()">Next</button>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <p class="created-with-chatgpt">Created with ChatGPT</p>
+    </footer>
+
+    <script>
+      // Current section index
+      let currentSection = 0;
+
+      // Get section elements
+      const sections = document.querySelectorAll(".section");
+
+      // Get progress bar element
+      const progressBar = document.getElementById("progressBar");
+
+      // Initialize
+      updateProgressBar();
+
+      // Function to show the next section
+      function showNextSection() {
+        sections[currentSection].classList.remove("active");
+        currentSection = Math.min(currentSection + 1, sections.length - 1);
+        sections[currentSection].classList.add("active");
+        updateProgressBar();
+      }
+
+      // Function to show the previous section
+      function showPrevSection() {
+        sections[currentSection].classList.remove("active");
+        currentSection = Math.max(currentSection - 1, 0);
+        sections[currentSection].classList.add("active");
+        updateProgressBar();
+      }
+
+      // Function to update the progress bar
+      function updateProgressBar() {
+        const progress = ((currentSection + 1) / sections.length) * 100;
+        progressBar.style.width = progress + "%";
+        // Enable/disable the Previous/Next buttons
+        document.getElementById("prevBtn").disabled = currentSection === 0;
+        document.getElementById("nextBtn").disabled =
+          currentSection === sections.length - 1;
+      }
+
+      // Function to start the game, redirect to another page
+      function startGame() {
+        window.location.href = "virtualPCR.html";
+      }
+    </script>
+  </body>
+</html>

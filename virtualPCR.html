@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Virtual PCR Simulator</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="logo">Virtual PCR Simulator</h1>
+
+      <!-- Progress Bar -->
+      <div class="progress-bar">
+        <div class="step-progress" id="stepProgress0" onclick="goToStep(0)">
+          Step 0
+        </div>
+        <div class="step-progress" id="stepProgress1" onclick="goToStep(1)">
+          Step 1
+        </div>
+        <div class="step-progress" id="stepProgress2" onclick="goToStep(2)">
+          Step 2
+        </div>
+        <div class="step-progress" id="stepProgress3" onclick="goToStep(3)">
+          Step 3
+        </div>
+        <div class="step-progress" id="stepProgress4" onclick="goToStep(4)">
+          Step 4
+        </div>
+      </div>
+
+      <!-- Step 0: Make Master Mix -->
+      <div class="step" id="step0" style="display: block">
+        <h2>Step 0: Make Master Mix</h2>
+        <label>Select Enzyme:</label>
+        <p>Please select one of the following enzymes to proceed:</p>
+        <select id="enzymeSelect" onchange="updateOptimalTemp()">
+          <option value="" disabled selected>Select an enzyme</option>
+          <option value="taq">Taq Polymerase (Optimal Temp: 72°C)</option>
+          <option value="pfu">Pfu Polymerase (Optimal Temp: 75°C)</option>
+          <option value="q5">Q5 Polymerase (Optimal Temp: 70°C)</option>
+        </select>
+        <p id="optimalTempInfo"></p>
+        <button onclick="addBuffer()">Add Buffer</button>
+        <button onclick="addDntp()">Add dNTP</button>
+        <p id="masterMixInfo"></p>
+        <button onclick="nextStep(0, 1)">Next</button>
+        <p class="created-with-chatgpt">Created with ChatGPT</p>
+      </div>
+
+      <!-- Step 1: Add Template and Primers -->
+      <div class="step" id="step1" style="display: none">
+        <h2>Step 1: Add Template and Primers</h2>
+        <label>DNA Sequence (500 bp):</label>
+        <textarea id="dnaSequence" rows="4" cols="50"></textarea>
+        <input
+          type="file"
+          id="fileInput"
+          accept=".fasta"
+          onchange="loadFastaFile(event)"
+        />
+        <button onclick="generateDNASequence()">Generate DNA Sequence</button>
+        <label>Enter Desired PCR Product Length Range:</label>
+        <input
+          type="number"
+          id="productLengthMin"
+          min="50"
+          max="500"
+          value="200"
+          placeholder="Min"
+        />
+        <input
+          type="number"
+          id="productLengthMax"
+          min="50"
+          max="500"
+          value="300"
+          placeholder="Max"
+        />
+        <button onclick="suggestPrimers()">Suggest Primers</button>
+        <div id="primerSuggestions"></div>
+        <label>Enter Forward Primer:</label>
+        <input type="text" id="primerForward" oninput="displayPrimerLength()" />
+        <label>Enter Reverse Primer:</label>
+        <input type="text" id="primerReverse" oninput="displayPrimerLength()" />
+        <p id="primerInfo"></p>
+        <button onclick="nextStep(1, 0)">Back</button>
+        <button onclick="validatePrimers()">Next</button>
+        <p class="created-with-chatgpt">Created with ChatGPT</p>
+      </div>
+
+      <!-- Step 2: PCR Machine Settings -->
+      <div class="step" id="step2" style="display: none">
+        <h2>Step 2: PCR Machine Settings</h2>
+        <label>Denaturation Temperature (°C):</label>
+        <input type="number" id="denaturationTemp" value="95" />
+        <label>Annealing Temperature (°C):</label>
+        <input type="number" id="annealingTemp" value="55" />
+        <label>Extension Temperature (°C):</label>
+        <input type="number" id="extensionTemp" value="72" />
+        <label>Number of Cycles:</label>
+        <input type="number" id="cycles" value="30" />
+        <button onclick="nextStep(2, 1)">Back</button>
+        <button onclick="runPCR()">Run PCR</button>
+        <p class="created-with-chatgpt">Created with ChatGPT</p>
+      </div>
+
+      <!-- Step 3: Electrophoresis -->
+      <div class="step" id="step3" style="display: none">
+        <h2>Step 3: Electrophoresis</h2>
+        <p>Markers are shown every 100 bp.</p>
+        <button onclick="performElectrophoresis()">Run Electrophoresis</button>
+        <button onclick="stopElectrophoresis()">Stop Electrophoresis</button>
+        <canvas id="gelCanvas" width="600" height="200"></canvas>
+        <button onclick="nextStep(3, 2)">Back</button>
+        <button onclick="showSummary()">Show Summary</button>
+        <button onclick="nextStep(3, 4)">Next</button>
+        <p class="created-with-chatgpt">Created with ChatGPT</p>
+      </div>
+
+      <!-- Step 4: Gel Extraction and Sequencing -->
+      <div class="step" id="step4" style="display: none">
+        <h2>Step 4: Gel Extraction and Sequencing</h2>
+        <button id="extractButton" onclick="extractGel()">
+          Extract PCR Product from Gel
+        </button>
+        <button
+          id="sequenceButton"
+          style="display: none"
+          onclick="sequencePCRProduct()"
+        >
+          Sequence PCR Product
+        </button>
+        <div id="gelImage"></div>
+        <div id="sequenceLoading" style="display: none">
+          <div class="loader"></div>
+          <p>Analyzing...</p>
+        </div>
+        <div id="sequenceComplete" style="display: none">
+          <h3>Analysis Complete</h3>
+          <p>The sequence has been successfully analyzed.</p>
+          <button id="downloadFasta" onclick="downloadFasta()">
+            Download Forward Primer Sequence
+          </button>
+          <button id="downloadAbi" onclick="downloadReverseFasta()">
+            Download Reverse Primer Sequence
+          </button>
+        </div>
+        <button onclick="nextStep(4, 3)">Back</button>
+        <p class="created-with-chatgpt">Created with ChatGPT</p>
+      </div>
+
+      <!-- Result -->
+      <div id="result"></div>
+      <button id="downloadHtml" style="display: none" onclick="downloadHtml()">
+        Download Results as HTML
+      </button>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
